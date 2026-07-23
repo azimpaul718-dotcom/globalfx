@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobalFX — Trade Smarter, Earn More</title>
+    <style>
+        :root {
+            --bg-primary: #060b14;
+            --bg-secondary: #0d1424;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --gold: #e8b830;
+            --gold-light: #f5d060;
+            --gold-dark: #b8921a;
+            --teal: #0cd6a8;
+            --red: #ef4444;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0b4cc;
+            --text-muted: #6b7d95;
+            --border: #1e2d42;
+            --border-light: #263548;
+            --shadow-gold: 0 0 30px rgba(232, 184, 48, 0.15);
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; font-size:16px; }
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        .bg-orb {
+            position: fixed; border-radius:50%; filter:blur(120px); opacity:0.07;
+            pointer-events:none; z-index:0; animation:floatOrb 18s infinite ease-in-out;
+        }
+        .bg-orb-1 { width:600px; height:600px; background:radial-gradient(circle, #e8b830 0%, transparent 70%); top:-200px; left:-150px; }
+        .bg-orb-2 { width:500px; height:500px; background:radial-gradient(circle, #0cd6a8 0%, transparent 70%); bottom:-180px; right:-120px; animation-delay:-8s; }
+        .bg-orb-3 { width:400px; height:400px; background:radial-gradient(circle, #6366f1 0%, transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); animation-delay:-4s; opacity:0.04; }
+        @keyframes floatOrb {
+            0%,100% { transform:translate(0,0) scale(1); }
+            25% { transform:translate(60px,-40px) scale(1.08); }
+            50% { transform:translate(-30px,50px) scale(0.94); }
+            75% { transform:translate(-50px,-30px) scale(1.05); }
+        }
+        .grid-overlay {
+            position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.025;
+            background-image:linear-gradient(rgba(255,255,255,0.5) 1px,transparent 1px),
+                             linear-gradient(90deg, rgba(255,255,255,0.5) 1px,transparent 1px);
+            background-size:50px 50px;
+        }
+        .navbar {
+            position:fixed; top:0; left:0; right:0; z-index:1000;
+            background:rgba(6,11,20,0.75); backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border); padding:0 1.5rem;
+        }
+        .nav-inner { max-width:1280px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
+        .nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; font-weight:800; font-size:1.5rem; letter-spacing:-0.5px; color:#fff; }
+        .nav-logo .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--gold),var(--gold-dark)); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; font-size:1.2rem; font-weight:900; color:#000; box-shadow:var(--shadow-gold); }
+        .nav-links { display:flex; gap:2rem; list-style:none; }
+        .nav-links a { color:var(--text-secondary); text-decoration:none; font-weight:500; font-size:0.95rem; transition:var(--transition); padding:4px 0; }
+        .nav-links a:hover { color:#fff; }
+        .nav-cta { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#000!important; padding:10px 22px!important; border-radius:50px!important; font-weight:700!important; }
+        .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:8px; }
+        .hamburger span { width:26px; height:2.5px; background:#fff; border-radius:2px; transition:var(--transition); }
+        .section { position:relative; z-index:1; padding:5rem 1.5rem; }
+        .section-inner { max-width:1280px; margin:0 auto; }
+        .section-title { font-size:2.8rem; font-weight:900; letter-spacing:-0.5px; margin-bottom:1rem; }
+        .btn { display:inline-flex; align-items:center; gap:8px; padding:14px 28px; border-radius:50px; font-weight:700; font-size:1rem; text-decoration:none; cursor:pointer; border:none; transition:var(--transition); white-space:nowrap; }
+        .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#000; box-shadow:var(--shadow-gold); }
+        .btn-outline { background:transparent; color:#fff; border:2px solid var(--border-light); }
+        .card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem; }
+        input, select, textarea { background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; color:#fff; font-size:0.95rem; width:100%; margin-bottom:10px; }
+        input:focus, select:focus, textarea:focus { outline:none; border-color:var(--gold); }
+        .chat-widget { position:fixed; bottom:30px; right:30px; z-index:9998; }
+        @media (max-width:768px) {
+            .nav-links { display:none; }
+            .hamburger { display:flex; }
+            .section-title { font-size:2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo"><div class="logo-icon">G</div><span>GlobalFX</span></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#live">Live Prices</a></li>
+                <li><a href="#trade">Trade</a></li>
+                <li><a href="#bots">Bots</a></li>
+                <li><a href="#" class="nav-cta affiliate-link">Sign Up</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!-- Live Price Ticker -->
+    <section class="section" id="live" style="padding-top:8rem;">
+        <div class="section-inner">
+            <h2 class="section-title">📈 Live Market Prices</h2>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:1rem;">
+                <div class="card"><strong>EUR/USD</strong><br><span id="eurusd" class="price">--</span></div>
+                <div class="card"><strong>GBP/USD</strong><br><span id="gbpusd" class="price">--</span></div>
+                <div class="card"><strong>USD/JPY</strong><br><span id="usdjpy" class="price">--</span></div>
+                <div class="card"><strong>AUD/USD</strong><br><span id="audusd" class="price">--</span></div>
+                <div class="card"><strong>XAU/USD</strong><br><span id="xauusd" class="price">--</span></div>
+            </div>
+            <div style="margin-top:1rem;" id="accountPanel">
+                <p><strong>Connected Account:</strong> <span id="accountType">Demo</span> | Balance: <span id="accountBalance">$0</span></p>
+                <button id="disconnectBtn" class="btn btn-outline">Disconnect</button>
+            </div>
+            <button id="connectBtn" class="btn btn-gold" style="margin-top:1rem;">🔗 Connect Deriv Account</button>
+        </div>
+    </section>
+
+    <!-- Manual Trading -->
+    <section class="section" id="trade">
+        <div class="section-inner">
+            <h2 class="section-title">💱 Place a Trade</h2>
+            <div class="card" style="max-width:500px;">
+                <label>Symbol</label>
+                <select id="tradeSymbol">
+                    <option value="frxEURUSD">EUR/USD</option>
+                    <option value="frxGBPUSD">GBP/USD</option>
+                    <option value="frxUSDJPY">USD/JPY</option>
+                    <option value="frxAUDUSD">AUD/USD</option>
+                    <option value="frxXAUUSD">XAU/USD</option>
+                </select>
+                <label>Direction</label>
+                <select id="tradeDirection">
+                    <option value="BUY">BUY (CALL)</option>
+                    <option value="SELL">SELL (PUT)</option>
+                </select>
+                <label>Amount (USD)</label>
+                <input type="number" id="tradeAmount" value="10" step="any">
+                <label>Duration (minutes)</label>
+                <input type="number" id="tradeDuration" value="1">
+                <select id="tradeUnit">
+                    <option value="t">Ticks</option>
+                    <option value="m">Minutes</option>
+                </select>
+                <button id="tradeBtn" class="btn btn-gold" style="width:100%;">Execute Trade</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bots Management -->
+    <section class="section" id="bots">
+        <div class="section-inner">
+            <h2 class="section-title">🤖 Auto‑Trading Bots</h2>
+            <div class="card">
+                <h3>Simple Condition Bot</h3>
+                <label>Symbol</label>
+                <select id="botSymbol">
+                    <option value="frxEURUSD">EUR/USD</option>
+                    <option value="frxGBPUSD">GBP/USD</option>
+                    <option value="frxUSDJPY">USD/JPY</option>
+                    <option value="frxAUDUSD">AUD/USD</option>
+                    <option value="frxXAUUSD">XAU/USD</option>
+                </select>
+                <label>Direction</label>
+                <select id="botDirection"><option value="BUY">BUY</option><option value="SELL">SELL</option></select>
+                <label>Amount</label>
+                <input type="number" id="botAmount" value="10">
+                <label>Duration</label>
+                <input type="number" id="botDuration" value="1">
+                <select id="botUnit"><option value="t">Ticks</option><option value="m">Minutes</option></select>
+                <label>Condition Type</label>
+                <select id="botConditionType"><option value="price_above">Price above</option><option value="price_below">Price below</option></select>
+                <label>Condition Value</label>
+                <input type="number" id="botConditionValue" step="any" placeholder="e.g. 1.0900">
+                <button id="createBotBtn" class="btn btn-gold">Create Bot</button>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>📜 Upload Your Own Algorithm</h3>
+                <textarea id="customBotCode" rows="6" placeholder="function shouldTrade(currentPrice, previousPrice) { return currentPrice > 1.0900; }"></textarea>
+                <button id="uploadBotBtn" class="btn btn-gold">Upload Custom Bot</button>
+            </div>
+            <div class="card" style="margin-top:1rem;">
+                <h3>Active Bots</h3>
+                <div id="botsList"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating AI Chat -->
+    <div id="aiFloatingBtn" class="chat-widget" style="width:55px;height:55px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 6px 20px rgba(0,0,0,0.5);">🤖</div>
+    <div id="aiChatPanel" style="position:fixed;bottom:100px;right:30px;width:320px;height:420px;background:#111827;border:1px solid #1e2d42;border-radius:16px;display:none;flex-direction:column;z-index:9999;box-shadow:0 10px 40px rgba(0,0,0,0.6);">
+        <div style="background:#0d1424;padding:12px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;">
+            <strong>🤖 AI Assistant</strong>
+            <span id="closeChat" style="cursor:pointer;">✖</span>
+        </div>
+        <div id="chatMessages" style="flex:1;overflow-y:auto;padding:12px;font-size:0.9rem;color:#e2e8f0;"></div>
+        <div style="display:flex;padding:8px;border-top:1px solid #1e2d42;">
+            <input id="chatInput" placeholder="Ask about EUR/USD..." style="flex:1;background:#1a2332;border:none;padding:8px;border-radius:20px;color:#fff;">
+            <button id="sendChat" style="background:var(--gold);border:none;border-radius:50%;width:36px;height:36px;margin-left:8px;font-size:18px;">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const APP_ID = '33ST7U3BsaF4rLqIPzd9w';
+        // ★ Your Deriv affiliate link is already set below
+        const DERIV_AFFILIATE_LINK = 'https://partner-tracking.deriv.com/click?a=50572&o=1&c=3&link_id=1';
+        const BACKEND_URL = window.location.origin;
+
+        let userToken = null;
+        let userId = localStorage.getItem('globalfx_userId') || (() => {
+            const id = 'user_' + Date.now().toString(36) + Math.random().toString(36).substr(2,5);
+            localStorage.setItem('globalfx_userId', id);
+            return id;
+        })();
+
+        // Affiliate links
+        document.querySelectorAll('.affiliate-link').forEach(el => el.href = DERIV_AFFILIATE_LINK);
+
+        // Live Prices WebSocket
+        const wsPrices = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`);
+        wsPrices.onopen = () => wsPrices.send(JSON.stringify({ ticks: 'frxEURUSD,frxGBPUSD,frxUSDJPY,frxAUDUSD,frxXAUUSD' }));
+        wsPrices.onmessage = (msg) => {
+            const data = JSON.parse(msg.data);
+            if (data.tick) {
+                const { symbol, quote } = data.tick;
+                const el = document.getElementById(symbol.replace('frx','').toLowerCase());
+                if (el) el.textContent = quote.toFixed(symbol==='frxXAUUSD'?2:5);
+            }
+        };
+
+        // OAuth
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'deriv_token') handleToken(e.data.token);
+        });
+
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            const authUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(BACKEND_URL + '/oauth-callback.html')}&response_type=token&scope=read%20trade%20payments%20admin&accounts=all`;
+            window.open(authUrl, 'Deriv OAuth', 'width=600,height=700');
+        });
+
+        async function handleToken(token) {
+            userToken = token;
+            sessionStorage.setItem('deriv_token', token);
+            document.getElementById('accountPanel').style.display = 'block';
+            await fetch(`${BACKEND_URL}/api/auth`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ userId, token })
+            });
+            fetchAccountInfo(token);
+            loadBots();
+        }
+
+        async function fetchAccountInfo(token) {
+            const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`);
+            ws.onopen = () => ws.send(JSON.stringify({ authorize: token }));
+            ws.onmessage = (msg) => {
+                const data = JSON.parse(msg.data);
+                if (data.authorize) {
+                    document.getElementById('accountType').textContent = data.authorize.is_virtual ? 'Demo' : 'Real';
+                    document.getElementById('accountBalance').textContent = data.authorize.balance + ' ' + data.authorize.currency;
+                    ws.close();
+                }
+            };
+        }
+
+        document.getElementById('disconnectBtn').addEventListener('click', () => {
+            sessionStorage.removeItem('deriv_token');
+            userToken = null;
+            document.getElementById('accountPanel').style.display = 'none';
+        });
+
+        // Trade execution
+        document.getElementById('tradeBtn').addEventListener('click', async () => {
+            if (!userToken) return alert('Connect your account first.');
+            const resp = await fetch(`${BACKEND_URL}/api/trade`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userId,
+                    symbol: document.getElementById('tradeSymbol').value,
+                    direction: document.getElementById('tradeDirection').value,
+                    amount: parseFloat(document.getElementById('tradeAmount').value),
+                    duration: parseInt(document.getElementById('tradeDuration').value) || 1,
+                    durationUnit: document.getElementById('tradeUnit').value
+                })
+            });
+            const result = await resp.json();
+            alert(result.success ? 'Trade executed!' : 'Error: ' + result.error);
+        });
+
+        // Simple bots
+        document.getElementById('createBotBtn').addEventListener('click', async () => {
+            if (!userToken) return alert('Connect account first.');
+            const resp = await fetch(`${BACKEND_URL}/api/bots`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userId,
+                    symbol: document.getElementById('botSymbol').value,
+                    direction: document.getElementById('botDirection').value,
+                    amount: parseFloat(document.getElementById('botAmount').value),
+                    duration: parseInt(document.getElementById('botDuration').value) || 1,
+                    durationUnit: document.getElementById('botUnit').value,
+                    condition: {
+                        type: document.getElementById('botConditionType').value,
+                        value: parseFloat(document.getElementById('botConditionValue').value)
+                    }
+                })
+            });
+            const data = await resp.json();
+            if (data.error) alert(data.error);
+            else { alert('Bot created!'); loadBots(); }
+        });
+
+        // Custom bot upload
+        document.getElementById('uploadBotBtn').addEventListener('click', async () => {
+            if (!userToken) return alert('Connect account first.');
+            const code = document.getElementById('customBotCode').value;
+            const resp = await fetch(`${BACKEND_URL}/api/bots/code`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    userId,
+                    symbol: document.getElementById('botSymbol').value,
+                    direction: document.getElementById('botDirection').value,
+                    amount: parseFloat(document.getElementById('botAmount').value),
+                    duration: parseInt(document.getElementById('botDuration').value) || 1,
+                    durationUnit: document.getElementById('botUnit').value,
+                    code
+                })
+            });
+            const data = await resp.json();
+            if (data.error) alert(data.error);
+            else { alert('Custom bot uploaded!'); loadBots(); }
+        });
+
+        async function loadBots() {
+            const resp = await fetch(`${BACKEND_URL}/api/bots/${userId}`);
+            const bots = await resp.json();
+            const list = document.getElementById('botsList');
+            list.innerHTML = bots.map(b => `
+                <div style="padding:8px; border-bottom:1px solid var(--border);">
+                    <strong>${b.symbol}</strong> — ${b.direction} (${b.type}) — <span class="badge">${b.status}</span>
+                    <button onclick="deleteBot('${b.id}')" style="float:right;">❌</button>
+                </div>
+            `).join('');
+        }
+
+        async function deleteBot(botId) {
+            await fetch(`${BACKEND_URL}/api/bots/${botId}`, { method: 'DELETE' });
+            loadBots();
+        }
+
+        // AI Chat
+        const aiBtn = document.getElementById('aiFloatingBtn');
+        const chatPanel = document.getElementById('aiChatPanel');
+        const closeChat = document.getElementById('closeChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendChat');
+        let chatHistory = [];
+
+        aiBtn.addEventListener('click', () => chatPanel.style.display = 'flex');
+        closeChat.addEventListener('click', () => chatPanel.style.display = 'none');
+
+        async function sendMessage() {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
+            addMessage('You', msg);
+            chatHistory.push({ role: 'user', content: msg });
+            chatInput.value = '';
+            const resp = await fetch(`${BACKEND_URL}/api/chat`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: msg, history: chatHistory })
+            });
+            const data = await resp.json();
+            addMessage('AI', data.reply);
+            chatHistory.push({ role: 'assistant', content: data.reply });
+        }
+
+        function addMessage(sender, text) {
+            const div = document.createElement('div');
+            div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+            div.style.marginBottom = '8px';
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        // Check session
+        if (sessionStorage.getItem('deriv_token')) {
+            handleToken(sessionStorage.getItem('deriv_token'));
+        }
+    </script>
+</body>
+                  </html>
