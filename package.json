@@ -1,0 +1,15 @@
+{
+  "name": "globalfx",
+  "version": "1.0.0",
+  "description": "GlobalFX trading platform with Deriv integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0",
+    "node-fetch": "^2.7.0",
+    "vm2": "^3.9.23"
+  }
+}
