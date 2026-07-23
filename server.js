@@ -15,7 +15,7 @@ const DERIV_APP_ID = '33ST7U3BsaF4rLqIPzd9w';
 const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
 
 // ── Use Render's automatic URL, or fallback to your hardcoded URL ──
-const MY_ORIGIN = process.env.RENDER_EXTERNAL_URL || 'https://YOUR_RENDER_URL.onrender.com';
+const MY_ORIGIN = process.env.RENDER_EXTERNAL_URL || 'https://globalfx.onrender.com';
 // ⚠️ Replace 'YOUR_RENDER_URL' with your actual Render subdomain (e.g., globalfx)
 
 let userTokens = {};
