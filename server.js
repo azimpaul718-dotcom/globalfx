@@ -14,6 +14,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DERIV_APP_ID = '33ST7U3BsaF4rLqIPzd9w';
 const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
 
+// ── Use Render's automatic URL, or fallback to your hardcoded URL ──
+const MY_ORIGIN = process.env.RENDER_EXTERNAL_URL || 'https://YOUR_RENDER_URL.onrender.com';
+// ⚠️ Replace 'YOUR_RENDER_URL' with your actual Render subdomain (e.g., globalfx)
+
 let userTokens = {};
 let bots = {};
 let priceCache = {};
@@ -29,10 +33,14 @@ function saveBots() {
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 
-// ── Market WebSocket (with error handler) ──
+// ── Market WebSocket (with Origin header) ──
 let marketWs = null;
 function connectMarketWS() {
-  marketWs = new WebSocket(DERIV_WS_URL);
+  marketWs = new WebSocket(DERIV_WS_URL, {
+    headers: {
+      Origin: MY_ORIGIN
+    }
+  });
   marketWs.on('open', () => {
     console.log('Market WS connected');
     marketWs.send(JSON.stringify({ ticks: 'frxEURUSD,frxGBPUSD,frxUSDJPY,frxAUDUSD,frxXAUUSD' }));
@@ -56,12 +64,16 @@ function connectMarketWS() {
 }
 connectMarketWS();
 
-// ── Trade execution WebSocket (with error handler) ──
+// ── Trade execution WebSocket (with Origin header) ──
 async function executeTrade(userId, symbol, direction, amount, duration, durationUnit = 't') {
   const token = userTokens[userId];
   if (!token) throw new Error('User token not found');
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(DERIV_WS_URL);
+    const ws = new WebSocket(DERIV_WS_URL, {
+      headers: {
+        Origin: MY_ORIGIN
+      }
+    });
     ws.on('error', (err) => reject(new Error('Trade WS error: ' + err.message)));
     ws.on('open', () => ws.send(JSON.stringify({ authorize: token })));
     ws.on('message', (data) => {
